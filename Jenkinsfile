@@ -1,20 +1,19 @@
 pipeline {
     agent any
     environment {
-        // Define environment variables for Telegram bot
-        TELEGRAM_BOT_TOKEN = '6790816236:AAFmBx0K4blTxcBHRlSAtVBRDWOacF9BQ3U'
-        TELEGRAM_CHAT_ID = '1017399433'
+        TELEGRAM_BOT_TOKEN = credentials('telegram-bot-token')
+        TELEGRAM_CHAT_ID = credentials('telegram-chat-id')
         PROJECT_NAME = "${env.JOB_NAME}"
-        PIPELINE_LINK = "${env.BUILD_URL}"  // Jenkins pipeline URL
-        TRIGGERED_USER = "${env.CHANGE_AUTHOR}"  // User triggering the pipeline
-        TXT_FILE = 'test.txt'  // The text file used to simulate success/failure
+        PIPELINE_LINK = "${env.BUILD_URL}"  
+        TRIGGERED_USER = "${env.CHANGE_AUTHOR}" 
+        TXT_FILE = 'test.txt'
     }
     
     stages {
         stage('Notify Start') {
             steps {
                 script {
-                    sendTelegramMessage("🔔 *Pipeline Triggered*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
+                    sendTelegramMessage("*Pipeline Triggered*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
                 }
             }
         }
@@ -26,7 +25,7 @@ pipeline {
                     if (!buildSuccess) {
                         error "Build failed due to the content of the text file."
                     } else {
-                        sendTelegramMessage("✅ *Build Stage Successful*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
+                        sendTelegramMessage("Build Stage Successful*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
                     }
                 }
             }
@@ -39,7 +38,7 @@ pipeline {
                     if (!deploySuccess) {
                         error "Deploy failed due to the content of the text file."
                     } else {
-                        sendTelegramMessage("🚀 *Deploy Stage Successful*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
+                        sendTelegramMessage("*Deploy Stage Successful*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
                     }
                 }
             }
@@ -49,12 +48,13 @@ pipeline {
     post {
         success {
             script {
-                sendTelegramMessage("🎉 *Pipeline Completed Successfully*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
+                sendTelegramMessage("*Pipeline Completed Successfully*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
             }
         }
         failure {
             script {
-                sendTelegramMessage("❌ *Pipeline Failed*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}")
+                def errorMessage = currentBuild.description ?: 'No error description available.'
+                sendTelegramMessage("*Pipeline Failed*\n*Project:* ${env.PROJECT_NAME}\n*Pipeline Link:* ${env.PIPELINE_LINK}\n*Triggered by:* ${env.TRIGGERED_USER}\n*Error:* ${errorMessage}")
             }
         }
     }
