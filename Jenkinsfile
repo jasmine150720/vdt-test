@@ -70,13 +70,11 @@ def sendTelegramMessage(message) {
 }
 
 def checkBuildSuccess() {
-    // Read the first line of the file for build status
     def lines = readFile(env.TXT_FILE).split('\n')
     return lines[0].trim() == 'build_success'
 }
 
 def checkDeploySuccess() {
-    // Read the second line of the file for deploy status
     def lines = readFile(env.TXT_FILE).split('\n')
     return lines.length > 1 && lines[1].trim() == 'deploy_success'
 }
